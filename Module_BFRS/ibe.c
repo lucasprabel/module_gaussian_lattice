@@ -160,8 +160,8 @@ void Encrypt(poly_matrix A, poly_matrix u, scalar *id, poly M, poly_matrix b, po
 	transpose_signed_scalar_matrix(e_0_t, e_0, PARAM_M - PARAM_K, 1);
 	transpose_signed_scalar_matrix(e_1_t, e_1, PARAM_K, 1);
 
-	matrix_crt_representation(s_t, 1, PARAM_D, LOG_R);
-	mul_crt_poly_matrix(factor1, s_t, A, 1, PARAM_D, PARAM_M, LOG_R);
+	matrix_crt_representation((poly_matrix) s_t, 1, PARAM_D, LOG_R);
+	mul_crt_poly_matrix((poly_matrix) factor1, (poly_matrix) s_t, A, 1, PARAM_D, PARAM_M, LOG_R);
 	transpose_signed_scalar_matrix(factor1_t, factor1, 1, PARAM_M);
 
 
@@ -172,7 +172,7 @@ void Encrypt(poly_matrix A, poly_matrix u, scalar *id, poly M, poly_matrix b, po
 	for (int k = 0 ; k < PARAM_M - PARAM_K ; k++)
 	{
 		poly_matrix factor2_k = poly_matrix_element(factor2, PARAM_M, 0, k);
-		poly_matrix e_0_t_k = poly_matrix_element(e_0_t, PARAM_M - PARAM_K, 0, k);
+		poly_matrix e_0_t_k = (poly_matrix) poly_matrix_element(e_0_t, PARAM_M - PARAM_K, 0, k);
 
 		factor2_k = e_0_t_k;
 	}
@@ -181,23 +181,23 @@ void Encrypt(poly_matrix A, poly_matrix u, scalar *id, poly M, poly_matrix b, po
 	for (int k = PARAM_M - PARAM_K ; k < PARAM_M ; k++)
 	{
 		poly_matrix factor2_k = poly_matrix_element(factor2, PARAM_M, 0, k);
-		poly_matrix e_1_t_k = poly_matrix_element(e_1_t, PARAM_K, 0, k);
+		poly_matrix e_1_t_k = (poly_matrix) poly_matrix_element(e_1_t, PARAM_K, 0, k);
 
 		factor2_k = e_1_t_k;
 	}
 
-	transpose_signed_scalar_matrix(factor2_t, factor2, 1, PARAM_M);
+	transpose_signed_scalar_matrix((signed_scalar *) factor2_t, (signed_scalar *) factor2, 1, PARAM_M);
 
-	add_to_poly_matrix(b, factor1_t, 1, PARAM_M);
+	add_to_poly_matrix(b, (poly_matrix) factor1_t, 1, PARAM_M);
 	add_to_poly_matrix(b, factor2_t, 1, PARAM_M);
 
 
 	scalar *prod_coeffs = malloc(PARAM_N * sizeof(scalar));
 	poly_matrix prod = prod_coeffs;
-	mul_crt_poly_matrix(prod, s_t, u, 1, PARAM_D, 1, LOG_R);
+	mul_crt_poly_matrix(prod, (poly_matrix) s_t, u, 1, PARAM_D, 1, LOG_R);
 
 	c = poly_matrix_element(prod, 1,0,0);
-	add_poly(c, c, e_prime, PARAM_N-1);
+	add_poly(c, c, (poly) e_prime, PARAM_N-1);
 
 	for (int i=0 ; i <= PARAM_N ; i++)
 		{
