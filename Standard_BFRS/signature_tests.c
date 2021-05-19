@@ -226,6 +226,7 @@ void test_Sign_and_Verify(int n)
 	
 	for(int i = 0 ; i < n ; ++i)
 		{
+
 		Sign(nu, A, T, cplx_T, sch_comp, m);
 		
 		for(int j = 0 ; j < PARAM_D ; ++j)
@@ -494,6 +495,7 @@ int time_Verify2(int n)
 	return t1;
 	}
 
+
 int main(int argc, char **argv)
 	{
 	if(argc < 2)
@@ -508,6 +510,7 @@ int main(int argc, char **argv)
 	printf("\tn = %d\n", PARAM_N);
 	printf("\tr = %d\n", PARAM_R);
 	printf("\tq = %d\n", PARAM_Q);
+	printf("\tb = %d\n", PARAM_B);
 	printf("\tk = %d\n", PARAM_K);
 	printf("\td = %d\n", PARAM_D);
 	printf("\tsigma = %f\n", PARAM_SIGMA);
@@ -521,10 +524,10 @@ int main(int argc, char **argv)
 	
 	//random_bytes_init();
 	
-	//test_KeyGen(n);
-	test_Sign_and_Verify(n);
+	test_KeyGen(n);
+	//test_Sign_and_Verify(n);
 	//test_construct_and_deconstruct_A_m(n);
-	
+
 	//time_KeyGen1(n);
 	//time_Sign1(n);
 	//time_Sign2(n);

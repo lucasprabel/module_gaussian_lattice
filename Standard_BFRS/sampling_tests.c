@@ -111,7 +111,7 @@ void test_ring_sample_G(int n)
 			{
 			if(prod[j] != u[j])
 				{
-				printf("%d %d : %" PRIu32 "\n", i, j, prod[j]);
+				printf("%d %d : %" PRIu32 "\n", i, j, prod[j]-u[j]);
 				}
 			}
 		}
@@ -420,7 +420,7 @@ int main(int argc, char **argv)
 	//test_sample_D(n);
 	//test_scalar_sample_G(n);
 	//test_ring_sample_G(n);
-	//test_module_sample_G(n);
+	test_module_sample_G(n);
 	//test_sample_perturb(n);
 	//test_trap_gen();
 	//test_sample_pre();
@@ -429,7 +429,8 @@ int main(int argc, char **argv)
 	//test_cplx_crt_representation();
 	//test_sch_comp_computations();
 	
-	is_zeta_big_enough(n);
+
+	//is_zeta_big_enough(n);
 	
 	//time_module_sample_G(n);
 	

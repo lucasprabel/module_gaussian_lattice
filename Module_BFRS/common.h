@@ -33,20 +33,20 @@
 #define PARAM_ALPHA (54.35) // Gaussian parameter (sampling perturbations)
 #define PARAM_ZETA (83290.0) // Gaussian parameter (presampling)
 #define PARAM_T 14 // Tailcut
+#define PARAM_B 2
 */
 
 // q = 1073740609, d = 6, r = 32
 #define PARAM_Q 1073740609 // modulus q
 #define PARAM_K 30 // size of q
-#define PARAM_N 1024 // degree of polynomials
+#define PARAM_N 256 // degree of polynomials
 #define PARAM_R 32 // number of irreducible factors of x^n + 1 in F_q[x]
-#define PARAM_D 1 // rank of the module
+#define PARAM_D 6 // rank of the module
 #define PARAM_SIGMA 6.15 // Gaussian parameter (generation of the trapdoor)
 #define PARAM_ALPHA (60.50) // Gaussian parameter (sampling perturbations)
 #define PARAM_ZETA (112522.0) // Gaussian parameter (presampling)
 #define PARAM_T 15 // Tailcut
-#define PARAM_TAU 15
-#define PARAM_GAMMA 5
+#define PARAM_B 2
 
 
 /*
@@ -67,6 +67,7 @@
 #define PARAM_ALPHA (60.50) // Gaussian parameter (sampling perturbations)
 #define PARAM_ZETA (112522.0) // Gaussian parameter (presampling)
 #define PARAM_T 15 // Tailcut
+#define PARAM_B 2
 */
 /*
 #define MONT 7548
@@ -93,7 +94,22 @@
 //#define PARAM_ZETA 14851.468496 // C = 1.3
 //#define PARAM_ZETA 20563.571294 // C = 1.8
 #define PARAM_T 11 // Tailcut
+#define PARAM_B 2
 */
+
+
+// Test parameter set
+// q = 1073740609, d = 6, r = 32
+/*#define PARAM_Q 1073740609 // modulus q
+#define PARAM_K 19 // size of q
+#define PARAM_N 256 // degree of polynomials
+#define PARAM_R 32 // number of irreducible factors of x^n + 1 in F_q[x]
+#define PARAM_D 6 // rank of the module
+#define PARAM_SIGMA 6.15 // Gaussian parameter (generation of the trapdoor)
+#define PARAM_ALPHA (103.53) // Gaussian parameter (sampling perturbations)
+#define PARAM_ZETA (184130.23) // Gaussian parameter (presampling)
+#define PARAM_T 15 // Tailcut
+#define PARAM_B 3*/
 
 /*// Test parameter set
 #define PARAM_Q 8388593 // modulus q
@@ -104,6 +120,7 @@
 #define PARAM_SIGMA 4.5 // Gaussian parameter (generation of the trapdoor)
 #define PARAM_ZETA 9129.0 // Gaussian parameter (presampling)
 #define PARAM_T 12 // Tailcut
+#define PARAM_B 2
 */
 
 /*// Pauline parameter set, 81-bit classical security
@@ -115,6 +132,7 @@
 #define PARAM_SIGMA 4.5 // Gaussian parameter (generation of the trapdoor)
 #define PARAM_ZETA 9129.0 // Gaussian parameter (presampling)
 #define PARAM_T 12 // Tailcut
+#define PARAM_B 2
 */
 
 /*// Pauline parameter set, 97-bit classical security
@@ -126,6 +144,7 @@
 #define PARAM_SIGMA 4.5 // Gaussian parameter (generation of the trapdoor)
 #define PARAM_ZETA 12165.0 // Gaussian parameter (presampling)
 #define PARAM_T 12 // Tailcut
+#define PARAM_B 2
 */
 
 //	------------------
@@ -201,8 +220,6 @@
 	#define LOG_N 9
 #elif (PARAM_N == 8)
 	#define LOG_N 3
-#elif (PARAM_N == 1024)
-	#define LOG_N 10
 #else
 	#error "LOG_N is not defined for this value of PARAM_N"
 #endif
@@ -230,16 +247,19 @@
 	#error "LOG_R is not base 2 log of PARAM_R"
 #endif
 
-#if ((1 << PARAM_K) < PARAM_Q) || ((1 << (PARAM_K - 1)) >= PARAM_Q)
+/*#if ((1 << PARAM_K) < PARAM_Q) || ((1 << (PARAM_K - 1)) >= PARAM_Q)
 	#error "PARAM_K is not base 2 log of PARAM_Q"
-#endif
+#endif*/
 
 #if (PARAM_K < 2)
 	#error "PARAM_K < 2, not enough space in cplx_p_coeffs (sample_perturb)"
 	#endif
 
-#define GET_BIT(x, i) (((x) >> (i)) & 1)
-#define Q_BIT(i) GET_BIT(PARAM_Q, i)
+//#define GET_BIT(x, i) (((x) >> (i)) & 1)
+
+
+#define GET_BIT(x, i) get_bit_b(x, i)
+#define Q_BIT(i) get_bit_b(PARAM_Q, i)
 
 //#define DOUBLE_ZERO (((double_scalar) PARAM_Q) << (8*sizeof(double_scalar) - PARAM_K - 1)) // a double_scalar that is 0 mod q, such that there will be no underflow nor overflow during computations
 #define DOUBLE_ZERO (((double_scalar) PARAM_Q) * PARAM_Q)  // a double_scalar that is 0 mod q, such that there will be no underflow nor overflow during computations
@@ -257,6 +277,7 @@ typedef cplx *cplx_poly_matrix;
 #if (PARAM_Q > 0x7FFFFFFF)
 	#error "Modulus PARAM_Q does not fit in 31 bits"
 #endif
+
 /*
 #if (LOG_N - LOG_R + 2 * PARAM_K) >= 63
 	#error "(n/r)*q^2 >= 2^63, there might be overflow in polynomial multiplication"

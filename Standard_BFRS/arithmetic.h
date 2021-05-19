@@ -7,6 +7,8 @@
 
 #include "common.h"
 
+int get_bit_b(scalar x, scalar i);
+
 void ntt(uint32_t p[PARAM_N]);
 
 void invntt_frominvmont(uint32_t p[PARAM_N]);

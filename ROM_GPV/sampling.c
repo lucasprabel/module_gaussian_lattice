@@ -103,24 +103,24 @@ real h_coeffs[PARAM_K];
 void init_D_lattice_coeffs(void)
 	{
 	// d_i = (d_{i-1} + q_i) / 2, with d_{-1} = 0
-	d_coeffs[0] = Q_BIT(0) / 2.0;
+	d_coeffs[0] = Q_BIT(0) / PARAM_B;  // we have d_0 = q_0/b
 	for(int i = 1 ; i < PARAM_K ; ++i)
 		{
-		d_coeffs[i] = (d_coeffs[i-1] + Q_BIT(i)) / 2;
+		d_coeffs[i] = (d_coeffs[i-1] + Q_BIT(i)) / PARAM_B;
 		}
 	
-	// l_0^2 = 2(1 + 1/k) + 1, and l_i^2 = 2(1 + 1/(k-i))
-	l_coeffs[0] = sqrt(2*(1 + 1.0 / PARAM_K) + 1);
+	// l_0^2 = b(1 + 1/k) + 1, and l_i^2 = b(1 + 1/(k-i))
+	l_coeffs[0] = sqrt(PARAM_B*(1 + 1.0 / PARAM_K) + 1);
 	for(int i = 0 ; i < PARAM_K ; ++i)
 		{
-		l_coeffs[i] = sqrt(2*(1 + 1.0 / (PARAM_K - i)));
+		l_coeffs[i] = sqrt(PARAM_B*(1 + 1.0 / (PARAM_K - i)));
 		}
 	
-	// h_{i+1}^2 = 2(1 - 1/(k-i)), there is no h_0 so we set it to zero
+	// h_{i+1}^2 = b(1 - 1/(k-i)), there is no h_0 so we set it to zero
 	h_coeffs[0] = 0;
 	for(int i = 0 ; i < PARAM_K - 1 ; ++i)
 		{
-		h_coeffs[i+1] = sqrt(2*(1 - 1.0 / (PARAM_K - i)));
+		h_coeffs[i+1] = sqrt(PARAM_B*(1 - 1.0 / (PARAM_K - i)));
 		}
 	}
 
@@ -181,10 +181,10 @@ void sample_G_perturb(real *p, real sigma)
 		beta = -z[i] * h_coeffs[i];
 		}
 	
-	p[0] = 5*z[0] + 2*z[1];
+	p[0] = (2*PARAM_B+1)*z[0] + PARAM_B*z[1];
 	for(int i = 1 ; i < PARAM_K ; ++i)
 		{
-		p[i] = 2 * (z[i-1] + 2*z[i] + z[i+1]);
+		p[i] = PARAM_B * (z[i-1] + 2*z[i] + z[i+1]);
 		}
 	}
 
@@ -193,22 +193,22 @@ void sample_G_perturb(real *p, real sigma)
 */
 void scalar_sample_G(signed_scalar *t, scalar u)
 	{
-	real sigma = PARAM_ALPHA / 3, c[PARAM_K], p[PARAM_K];
+	real sigma = PARAM_ALPHA / (PARAM_B + 1), c[PARAM_K], p[PARAM_K];
 	signed_scalar z[PARAM_K];
 	sample_G_perturb(p, sigma);
 	
-	c[0] = ((real) GET_BIT(u,0) - p[0]) / 2;
+	c[0] = ((real) GET_BIT(u,0) - p[0]) / PARAM_B;
 	for(int i = 1 ; i < PARAM_K ; ++i)
 		{
-		c[i] = (c[i-1] + GET_BIT(u,i) - p[i]) / 2;
+		c[i] = (c[i-1] + GET_BIT(u,i) - p[i]) / PARAM_B;
 		}
 	
 	sample_D(z, c, sigma);
 	
-	t[0] = 2*z[0] + Q_BIT(0)*z[PARAM_K - 1] + GET_BIT(u,0);
+	t[0] = PARAM_B*z[0] + Q_BIT(0)*z[PARAM_K - 1] + GET_BIT(u,0);
 	for(int i = 1 ; i < PARAM_K - 1 ; ++i)
 		{
-		t[i] = 2*z[i] - z[i-1] + Q_BIT(i)*z[PARAM_K - 1] + GET_BIT(u,i);
+		t[i] = PARAM_B*z[i] - z[i-1] + Q_BIT(i)*z[PARAM_K - 1] + GET_BIT(u,i);
 		}
 	t[PARAM_K - 1] = Q_BIT(PARAM_K - 1)*z[PARAM_K - 1] - z[PARAM_K - 2] + GET_BIT(u,PARAM_K-1);
 	}

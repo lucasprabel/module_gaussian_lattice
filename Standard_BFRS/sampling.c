@@ -100,24 +100,24 @@ real h_coeffs[PARAM_K];
 void init_D_lattice_coeffs(void)
 	{
 	// d_i = (d_{i-1} + q_i) / 2, with d_{-1} = 0
-	d_coeffs[0] = Q_BIT(0) / 2.0;
+	d_coeffs[0] = Q_BIT(0) / PARAM_B;  // we have d_0 = q_0/b
 	for(int i = 1 ; i < PARAM_K ; ++i)
 		{
-		d_coeffs[i] = (d_coeffs[i-1] + Q_BIT(i)) / 2;
+		d_coeffs[i] = (d_coeffs[i-1] + Q_BIT(i)) / PARAM_B;
 		}
 	
-	// l_0^2 = 2(1 + 1/k) + 1, and l_i^2 = 2(1 + 1/(k-i))
-	l_coeffs[0] = sqrt(2*(1 + 1.0 / PARAM_K) + 1);
+	// l_0^2 = b(1 + 1/k) + 1, and l_i^2 = b(1 + 1/(k-i))
+	l_coeffs[0] = sqrt(PARAM_B*(1 + 1.0 / PARAM_K) + 1);
 	for(int i = 0 ; i < PARAM_K ; ++i)
 		{
-		l_coeffs[i] = sqrt(2*(1 + 1.0 / (PARAM_K - i)));
+		l_coeffs[i] = sqrt(PARAM_B*(1 + 1.0 / (PARAM_K - i)));
 		}
 	
-	// h_{i+1}^2 = 2(1 - 1/(k-i)), there is no h_0 so we set it to zero
+	// h_{i+1}^2 = b(1 - 1/(k-i)), there is no h_0 so we set it to zero
 	h_coeffs[0] = 0;
 	for(int i = 0 ; i < PARAM_K - 1 ; ++i)
 		{
-		h_coeffs[i+1] = sqrt(2*(1 - 1.0 / (PARAM_K - i)));
+		h_coeffs[i+1] = sqrt(PARAM_B*(1 - 1.0 / (PARAM_K - i)));
 		}
 	}
 
@@ -157,10 +157,10 @@ void sample_G_perturb(real *p, real sigma)
 		beta = -z[i] * h_coeffs[i];
 		}
 	
-	p[0] = 5*z[0] + 2*z[1];
+	p[0] = (2*PARAM_B+1)*z[0] + PARAM_B*z[1];
 	for(int i = 1 ; i < PARAM_K ; ++i)
 		{
-		p[i] = 2 * (z[i-1] + 2*z[i] + z[i+1]);
+		p[i] = PARAM_B * (z[i-1] + 2*z[i] + z[i+1]);
 		}
 	}
 
@@ -169,24 +169,24 @@ void sample_G_perturb(real *p, real sigma)
 */
 void scalar_sample_G(signed_scalar *t, scalar u)
 	{
-	real sigma = PARAM_ALPHA / 3, c[PARAM_K], p[PARAM_K];
+	real sigma = PARAM_ALPHA / (PARAM_B + 1), c[PARAM_K], p[PARAM_K];
 	signed_scalar z[PARAM_K];
 	sample_G_perturb(p, sigma);
 	
-	c[0] = ((real) GET_BIT(u,0) - p[0]) / 2;
+	c[0] = ((real) get_bit_b(u,0) - p[0]) / PARAM_B;
 	for(int i = 1 ; i < PARAM_K ; ++i)
 		{
-		c[i] = (c[i-1] + GET_BIT(u,i) - p[i]) / 2;
+		c[i] = (c[i-1] + get_bit_b(u,i) - p[i]) / PARAM_B;
 		}
 	
 	sample_D(z, c, sigma);
 	
-	t[0] = 2*z[0] + Q_BIT(0)*z[PARAM_K - 1] + GET_BIT(u,0);
+	t[0] = PARAM_B*z[0] + Q_BIT(0)*z[PARAM_K - 1] + get_bit_b(u,0);
 	for(int i = 1 ; i < PARAM_K - 1 ; ++i)
 		{
-		t[i] = 2*z[i] - z[i-1] + Q_BIT(i)*z[PARAM_K - 1] + GET_BIT(u,i);
+		t[i] = PARAM_B*z[i] - z[i-1] + Q_BIT(i)*z[PARAM_K - 1] + get_bit_b(u,i);
 		}
-	t[PARAM_K - 1] = Q_BIT(PARAM_K - 1)*z[PARAM_K - 1] - z[PARAM_K - 2] + GET_BIT(u,PARAM_K-1);
+	t[PARAM_K - 1] = Q_BIT(PARAM_K - 1)*z[PARAM_K - 1] - z[PARAM_K - 2] + get_bit_b(u,PARAM_K-1);
 	}
 
 /*
@@ -201,8 +201,6 @@ void ring_sample_G(signed_poly_matrix t, poly u)
 		{
 		signed_poly t_i = &t_T[i*PARAM_K];
 		scalar_sample_G(t_i, u[i]);
-		
-
 		}
 	
 	
@@ -299,8 +297,6 @@ void sample_fz(signed_scalar *p, cplx_poly cplx_p, cplx_poly f, cplx *c, int dep
 	{
 	int deg = PARAM_N >> depth;
 	
-
-	
 	if(deg == 1)
 		{
 		// f is a real polynomial of degree 0, so Re(f[0]) = f[0] = f(-1) = f
@@ -323,6 +319,8 @@ void sample_fz(signed_scalar *p, cplx_poly cplx_p, cplx_poly f, cplx *c, int dep
 	cplx_poly f0_bis = f0_bis_coeffs;
 	
 	memcpy(f0_bis, f0, deg/2 * sizeof(cplx));
+
+
 	
 	sample_2z(p, cplx_p, f0, f1, f0_bis, c, depth + 1);
 	scalar_stride(p, deg);
@@ -350,6 +348,7 @@ void sample_perturb(signed_poly_matrix p, cplx_poly_matrix T, cplx_poly_matrix s
 		{
 		p_2d[i] = SampleZ(0, param); // add q so that the coefficients are positive
 		}
+
 	
 
 	
@@ -362,11 +361,13 @@ void sample_perturb(signed_poly_matrix p, cplx_poly_matrix T, cplx_poly_matrix s
 
 	
 	matrix_cplx_crt_representation(cplx_p, PARAM_D * PARAM_K, 1);
+
 	
 	
 	
 	// Construct the new center (depends on the dk polynomials sampled before)
 	construct_first_center(c, T, cplx_p);
+
 	
 
 	
@@ -385,7 +386,6 @@ void sample_perturb(signed_poly_matrix p, cplx_poly_matrix T, cplx_poly_matrix s
 		cplx_poly covariance = covariance_coeffs, center = center_coeffs;
 		memcpy(covariance, sch_comp_ii, PARAM_N * sizeof(cplx));
 		memcpy(center, c_i, PARAM_N * sizeof(cplx));
-		
 		sample_fz(p_i, cplx_p, covariance, center, 0);
 		
 
@@ -420,12 +420,13 @@ void sample_perturb(signed_poly_matrix p, cplx_poly_matrix T, cplx_poly_matrix s
 */
 void sample_pre(poly_matrix x, poly_matrix A_m, poly_matrix T, cplx_poly_matrix cplx_T, cplx_poly_matrix sch_comp, poly h_inv)
 	{
+
 	// Sample a perturbation p in R^m
 	signed_scalar p_coeffs[PARAM_N * PARAM_M];
 	signed_poly_matrix p = p_coeffs;
 	
-	sample_perturb(p, cplx_T, sch_comp);
-	
+
+	sample_perturb(p, cplx_T, sch_comp);	
 	
 	// Add q to p's coeffs so that they are positive, and put p in the CRT domain
 	for(int i = 0 ; i < PARAM_N * PARAM_M ; ++i)

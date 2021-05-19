@@ -227,6 +227,18 @@ void matrix_invntt(poly_matrix A, int l1, int l2)
 		}
 	}*/
 
+int get_bit_b(scalar x, scalar i){
+
+    scalar count = 0;
+
+	while (count != i){
+		x = (x - x % PARAM_B)/PARAM_B;
+		count++;
+	}
+
+	return x % PARAM_B;
+}
+
 /*
 	Reduce double_f mod q and mod X^(n/r) + c
 */
@@ -1302,7 +1314,7 @@ void multiply_by_scalar_gadget_vector(scalar *prod, signed_scalar *v)
 	signed_double_scalar double_prod = 0;
 	for(int j = 0 ; j < PARAM_K ; ++j)
 		{
-		double_prod += ((signed_double_scalar) v[j] * (1 << j));
+		double_prod += ((signed_double_scalar) v[j] * pow(PARAM_B,j));
 		}
 	*prod = reduce_signed_double_to_positive_naive(double_prod);
 	}
@@ -1323,7 +1335,7 @@ void multiply_by_ring_gadget_vector(poly prod, signed_poly_matrix v)
 		// multiply v's i-th coordinate by 2^i
 		for(int j = 0 ; j < PARAM_N ; ++j)
 			{
-			double_prod[j] += ((signed_double_scalar) v_i[j] * (1 << i));
+			double_prod[j] += ((signed_double_scalar) v_i[j] * (pow(PARAM_B, i)));
 			}
 		}
 	
@@ -1413,7 +1425,7 @@ void construct_A_m(poly_matrix A, scalar *m)
 		
 		for(int j = 0 ; j < SMALL_DEGREE ; ++j)
 			{
-			mgT_i[j] = reduce_double_naive( ((double_scalar) 1 << i) * m[j]);
+			mgT_i[j] = reduce_double_naive( ((double_scalar) pow(PARAM_B, i)) * m[j]);
 			}
 		
 		// Put mgT[i] into the CRT domain (easy since it is of degree < n/r)

@@ -82,6 +82,7 @@
 #define PARAM_ALPHA (48.34) // Gaussian parameter (sampling perturbations)
 #define PARAM_ZETA (83832.0) // Gaussian parameter (presampling)
 #define PARAM_T 12 // Tailcut
+#define PARAM_B 2
 
 
 /*// q = 1073707009, n = 512, d = 2
