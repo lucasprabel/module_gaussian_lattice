@@ -364,7 +364,8 @@ void polynomial_division(signed_poly quo, signed_poly rem, signed_poly a, signed
 	// r <- a
 	for(int i=0 ; i < deg_a+1 ; ++i)
 		{
-		r[i] = SIGNED_DOUBLE_ZERO + a[i];
+		//r[i] = SIGNED_DOUBLE_ZERO + a[i];
+		r[i] = a[i];
 		}
 	
 	// Compute degree and leading coefficient of b
