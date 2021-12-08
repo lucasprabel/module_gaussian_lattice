@@ -47,6 +47,8 @@
 #define PARAM_ZETA (112522.0) // Gaussian parameter (presampling)
 #define PARAM_T 15 // Tailcut
 #define PARAM_B 2
+#define PARAM_TAU 12
+#define PARAM_GAMMA 12
 
 
 /*
